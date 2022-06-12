@@ -28,7 +28,7 @@ training_log_sex = {}
 validaiting_log_sex = {}
 
 start_time = time.strftime("_%d_%m_%Y_%H_%M")
-result_dir = '/results_3' + '/' + start_time
+result_dir = '/home/stu25/project/results_2/' + '/' + start_time
 os.makedirs(result_dir, exist_ok=True)
 writer = SummaryWriter(result_dir + '/' + 'tensor_logs')
 save_each = 5
@@ -44,7 +44,7 @@ csvLoggerFile_path_val_age = os.path.join(result_dir, "history_val_age.csv")
 csvLoggerFile_path_train_sex = os.path.join(result_dir, "history_train_sex.csv")
 csvLoggerFile_path_val_sex = os.path.join(result_dir, "history_val_sex.csv")
 
-train_dataloader_sex, train_dataloader_age, val_dataloader_sex, val_dataloader_age, test_dataloader_sex, test_dataloader_age =  load_dataset
+train_dataloader_sex, train_dataloader_age, val_dataloader_sex, val_dataloader_age, test_dataloader_sex, test_dataloader_age =  load_dataset()
 
 
 

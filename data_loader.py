@@ -31,9 +31,9 @@ class ECGDataset(torch.utils.data.Dataset):
         df = self.df.iloc[i]
 
         if self.sampling_rate == 100:
-            data = wfdb.rdsamp(df.filename_lr)
+            data = wfdb.rdsamp('/home/stu25/project/data/'+ df.filename_lr)
         else:
-            data = wfdb.rdsamp(df.filename_hr)
+            data = wfdb.rdsamp('/home/stu25/project/data/'+ df.filename_hr)
         signal, _ = data
         data = np.array(signal)
         data_pad = np.zeros((data.shape[0] + 120, data.shape[1]))
@@ -66,7 +66,7 @@ def load_dataset():
     val_fold = 9
 
     # load and convert annotation data
-    Y = pd.read_csv('ptbxl_database.csv', index_col='ecg_id')[:500]
+    Y = pd.read_csv('/home/stu25/project/Age-estimation-and-sex-classification-from-continuous-ECG-PPG/ptbxl_database.csv', index_col='ecg_id')
     Y.scp_codes = Y.scp_codes.apply(lambda x: ast.literal_eval(x))
     Y = Y.dropna(subset=['sex', 'age'])
 
