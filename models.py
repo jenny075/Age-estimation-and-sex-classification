@@ -49,9 +49,9 @@ class FCBlock(nn.Module):
 
 class SexNet(nn.Module):
 
-    def __init__(self):
+    def __init__(self,input_size=12):
         super().__init__()
-        self.Temp1 = TemporalBlock(12, 16, 7, 2)
+        self.Temp1 = TemporalBlock(input_size, 16, 7, 2)
         self.Temp2 = TemporalBlock(16, 16, 5, 4)
         self.Temp3 = TemporalBlock(16, 32, 4, 2)
         self.Temp4 = TemporalBlock(32, 32, 5, 4)
@@ -84,9 +84,9 @@ class SexNet(nn.Module):
         return x
 
 class AgeNet(nn.Module):
-    def __init__(self):
+    def __init__(self,input_size=12):
         super().__init__()
-        self.Temp1 = TemporalBlock(12,16,7,2)
+        self.Temp1 = TemporalBlock(input_size,16,7,2)
         self.Temp2 = TemporalBlock(16,16,5,4)
         self.Temp3 = TemporalBlock(16,32,4,2)
         self.Temp4 = TemporalBlock(32,32,5,4)
