@@ -249,7 +249,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     start_time = time.strftime("_%H_%M_%d_%m_%Y_")
-    result_dir = '/home/stu25/project/results_2' + '/' +args.title + start_time
+    if args.title == None:
+        result_dir = '/home/stu25/project/results_2' + '/' + start_time
+    else:
+        result_dir = '/home/stu25/project/results_2' + '/' +args.title + start_time
     os.makedirs(result_dir, exist_ok=True)
     if args.list_of_leads is not None:
         if args.group is None:

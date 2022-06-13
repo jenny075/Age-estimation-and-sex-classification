@@ -5,7 +5,7 @@ import ast
 import torch
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader, TensorDataset
-
+import matplotlib.pyplot as plt
 
 class ECGDataset(torch.utils.data.Dataset):
     """
@@ -79,7 +79,30 @@ def load_dataset(list_of_leads):
     Y_train = Y[(((Y.strat_fold != test_fold) & (Y.strat_fold != val_fold)))]
     Y_val = Y[(((Y.strat_fold == val_fold)))]
     Y_test = Y[(((Y.strat_fold == test_fold)))]
-
+    #
+    # Y_sex_train = Y_train.sex
+    # Y_age_train = Y_train.age
+    #
+    # Y_sex_val = Y_val.sex
+    # Y_age_val = Y_val.age
+    #
+    # Y_sex_test = Y_test.sex
+    # Y_age_test = Y_test.age
+    # #
+    # fig, axs = plt.subplots(nrows=3, ncols=2, figsize=(9, 12))
+    # img1 = axs[0, 0].hist(Y_sex_train)
+    # axs[0, 0].set_title('Y_sex train')
+    # img2 = axs[0, 1].hist(Y_age_train)
+    # axs[0, 1].set_title('Y_age train')
+    # img3 = axs[1, 0].hist(Y_sex_val)
+    # axs[1, 0].set_title('Y_sex val')
+    # img4 = axs[1, 1].hist(Y_age_val)
+    # axs[1, 1].set_title('Y_age val')
+    # img3 = axs[2, 0].hist(Y_sex_test)
+    # axs[2, 0].set_title('Y_sex test')
+    # img4 = axs[2, 1].hist(Y_age_test)
+    # axs[2, 1].set_title('Y_age test')
+    # plt.show()
 
     dataset_train_sex = ECGDataset(Y_train, 500, 'sex',list_of_leads)
     train_dataloader_sex = DataLoader(dataset_train_sex , batch_size=16, shuffle=True,drop_last=True)
