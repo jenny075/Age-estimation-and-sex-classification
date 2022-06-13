@@ -245,16 +245,25 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--list_of_leads', default=None, type= int, nargs="*")
     parser.add_argument('--group', default=None, type=int)
+    parser.add_argument('--title', default=None, type=str)
     args = parser.parse_args()
 
-    start_time = time.strftime("_%d_%m_%Y_%H_%M")
-    result_dir = '/home/stu25/project/results_2' + '/' + start_time
+    start_time = time.strftime("_%H_%M_%d_%m_%Y_")
+    result_dir = '/home/stu25/project/results_2' + '/' +args.title + start_time
     os.makedirs(result_dir, exist_ok=True)
     if args.list_of_leads is not None:
-        print('Recieved the following leads -  ', args.list_of_leads)
-        for i in range(len(args.list_of_leads)):
-            temp_dir = result_dir +'/Laed_'+str(args.list_of_leads[i])
-            trian(temp_dir,[args.list_of_leads[i]])
+        if args.group is None:
+            print('Recieved the following leads -  ', args.list_of_leads)
+            for i in range(len(args.list_of_leads)):
+                temp_dir = result_dir +'/Laed_'+str(args.list_of_leads[i])
+                trian(temp_dir,[args.list_of_leads[i]])
+        else:
+            list_of_list = [args.list_of_leads[n:n+args.group] for n in range(0, len(args.list_of_leads), args.group)]
+            print('Recieved the following leads -  ',list_of_list)
+            for i in range(len(list_of_list)):
+                temp_name = '_'.join(map(str, list_of_list[i]))
+                temp_dir = result_dir +'/Laeds_'+temp_name
+                trian(temp_dir,list_of_list[i])
     else:
         trian(result_dir)
 

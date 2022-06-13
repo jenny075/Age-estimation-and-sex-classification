@@ -72,7 +72,7 @@ def load_dataset(list_of_leads):
     val_fold = 9
 
     # load and convert annotation data
-    Y = pd.read_csv('/home/stu25/project/Age-estimation-and-sex-classification-from-continuous-ECG-PPG/ptbxl_database.csv', index_col='ecg_id')[:500]
+    Y = pd.read_csv('/home/stu25/project/Age-estimation-and-sex-classification-from-continuous-ECG-PPG/ptbxl_database.csv', index_col='ecg_id')
     Y.scp_codes = Y.scp_codes.apply(lambda x: ast.literal_eval(x))
     Y = Y.dropna(subset=['sex', 'age'])
 
