@@ -43,7 +43,7 @@ class ECGDataset(torch.utils.data.Dataset):
             data_pad[60:-60, :] = data
         else:
             data_pad = np.zeros((data.shape[0] + 120, len(self.list_of_leads)))
-            data_pad[60:-60, :] = data[:,np.array(self.list_of_leads)]
+            data_pad[60:-60, :] = data[:,np.array(self.list_of_leads)-1]
         signal = torch.Tensor(data_pad)
 
         if self.label_type == 'sex':

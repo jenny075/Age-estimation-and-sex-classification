@@ -10,7 +10,7 @@ import os
 from data_loader import load_dataset
 import models
 import argparse
-
+from tqdm import tqdm
 
 def writeCSVLoggerFile(csvLoggerFile_path,log):
     df = pd.DataFrame([log])
@@ -64,7 +64,7 @@ def trian(result_dir,list_of_leads=None):
     for epoch in range(20):  # loop over the dataset multiple times
         print(epoch)
         running_loss = 0.0
-        for i, data in enumerate(train_dataloader_age, 0):
+        for i, data in enumerate(tqdm(train_dataloader_age, 0)):
             # get the inputs; data is a list of [inputs, labels]
             inputs, labels = data  # next(iter(train_dataloader_age))
             print(inputs.shape)
@@ -100,7 +100,7 @@ def trian(result_dir,list_of_leads=None):
             age_net.eval()
             val_loss = 0.0
 
-            for i, val_data in enumerate(val_dataloader_age, 0):
+            for i, val_data in enumerate(tqdm(val_dataloader_age, 0)):
                 inputs, labels = val_data
                 inputs = inputs.to(device, non_blocking=True, dtype=torch.float)
                 labels = labels.to(device, non_blocking=True, dtype=torch.float)
@@ -167,7 +167,7 @@ def trian(result_dir,list_of_leads=None):
     for epoch in range(12):  # loop over the dataset multiple times
 
         running_loss = 0.0
-        for i, data in enumerate(train_dataloader_sex, 0):
+        for i, data in enumerate(tqdm(train_dataloader_sex, 0)):
             # get the inputs; data is a list of [inputs, labels]
             inputs, labels = data
             inputs = inputs.to(device, non_blocking=True, dtype=torch.float)
@@ -197,7 +197,7 @@ def trian(result_dir,list_of_leads=None):
             sex_net.eval()
             val_loss = 0.0
 
-            for i, val_data in enumerate(val_dataloader_sex, 0):
+            for i, val_data in enumerate(tqdm(val_dataloader_sex, 0)):
                 inputs, labels = val_data
                 inputs = inputs.to(device, non_blocking=True, dtype=torch.float)
                 labels = labels.to(device, non_blocking=True, dtype=torch.float)
