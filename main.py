@@ -11,6 +11,8 @@ from data_loader import load_dataset
 import models
 import argparse
 from tqdm import tqdm
+import numpy as np
+from itertools import combinations
 
 def writeCSVLoggerFile(csvLoggerFile_path,log):
     df = pd.DataFrame([log])
@@ -30,15 +32,11 @@ def trian(result_dir,list_of_leads=None):
     training_log_sex = {}
     validaiting_log_sex = {}
 
-    if not os.path.isdir(result_dir + '/Saved' + '/Periodic_save'):
-        os.makedirs(result_dir + '/Saved' + '/Periodic_save', exist_ok=True)
+    csvLoggerFile_path_train_age = result_dir + "history_train_age_leads_" + str(list_of_leads) +  ".csv"
 
-    if not os.path.isdir(result_dir + '/Saved' + '/Best_model_save'):
-        os.makedirs(result_dir + '/Saved' + '/Best_model_save', exist_ok=True)
-    csvLoggerFile_path_train_age = os.path.join(result_dir, "history_train_age.csv")
-    csvLoggerFile_path_val_age = os.path.join(result_dir, "history_val_age.csv")
-    csvLoggerFile_path_train_sex = os.path.join(result_dir, "history_train_sex.csv")
-    csvLoggerFile_path_val_sex = os.path.join(result_dir, "history_val_sex.csv")
+    csvLoggerFile_path_val_age = result_dir + "history_val_age_leads_" + str(list_of_leads) + ".csv"
+    csvLoggerFile_path_train_sex = result_dir + "history_train_sex_leads_" + str(list_of_leads) + ".csv"
+    csvLoggerFile_path_val_sex = result_dir + "history_val_sex_leads_" + str(list_of_leads) + ".csv"
 
     train_dataloader_sex, train_dataloader_age, val_dataloader_sex, val_dataloader_age, test_dataloader_sex, test_dataloader_age = load_dataset(list_of_leads)
 
@@ -67,7 +65,7 @@ def trian(result_dir,list_of_leads=None):
         for i, data in enumerate(tqdm(train_dataloader_age, 0)):
             # get the inputs; data is a list of [inputs, labels]
             inputs, labels = data  # next(iter(train_dataloader_age))
-            print(inputs.shape)
+            #print(inputs.shape)
             # print('Before-',inputs)
             inputs = inputs.to(device, non_blocking=True, dtype=torch.float)
             labels = labels.to(device, non_blocking=True, dtype=torch.float)
@@ -131,17 +129,17 @@ def trian(result_dir,list_of_leads=None):
                 'age_net': age_net.state_dict(),
                 'optimizer_age': optimizer_age.state_dict(),
                 'epoch': epoch + 1},
-                os.path.join(result_dir, 'Saved', 'Best_model_save', f"AgeNet.pth"))
+                result_dir+'Best_model_of_leads_'+str(list_of_leads) +'_' +f"AgeNet.pth")
 
             # save each % epoch
-        if epoch > 0 and epoch % save_each == 0:
-            print('save epoch')
-            print(os.path.join(result_dir, 'Saved', 'Periodic_save', f"AgeNet.pth"))
-            torch.save({
-                'age_net': age_net.state_dict(),
-                'optimizer_age': optimizer_age.state_dict(),
-                'epoch': epoch + 1},
-                os.path.join(result_dir, 'Saved', 'Periodic_save', f"AgeNet.pth"))
+        # if epoch > 0 and epoch % save_each == 0:
+        #     print('save epoch')
+        #     print(os.path.join(result_dir, 'Saved', 'Periodic_save', f"AgeNet.pth"))
+        #     torch.save({
+        #         'age_net': age_net.state_dict(),
+        #         'optimizer_age': optimizer_age.state_dict(),
+        #         'epoch': epoch + 1},
+        #         os.path.join(result_dir, 'Saved', 'Periodic_save', f"AgeNet.pth"))
 
     torch.cuda.empty_cache()
     print('Finished Training')
@@ -154,11 +152,11 @@ def trian(result_dir,list_of_leads=None):
     # writer = SummaryWriter(result_dir + '/' + 'tensor_logs')
     # save_each = 5
 
-    if not os.path.isdir(result_dir + '/Saved_sex' + '/Periodic_save'):
-        os.makedirs(result_dir + '/Saved_sex' + '/Periodic_save', exist_ok=True)
-
-    if not os.path.isdir(result_dir + '/Saved_sex' + '/Best_model_save'):
-        os.makedirs(result_dir + '/Saved_sex' + '/Best_model_save', exist_ok=True)
+    # if not os.path.isdir(result_dir + '/Saved_sex' + '/Periodic_save'):
+    #     os.makedirs(result_dir + '/Saved_sex' + '/Periodic_save', exist_ok=True)
+    #
+    # if not os.path.isdir(result_dir + '/Saved_sex' + '/Best_model_save'):
+    #     os.makedirs(result_dir + '/Saved_sex' + '/Best_model_save', exist_ok=True)
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     validation_losses = []
@@ -227,16 +225,16 @@ def trian(result_dir,list_of_leads=None):
                 'sex_net': sex_net.state_dict(),
                 'optimizer_sex': optimizer_sex.state_dict(),
                 'epoch': epoch + 1},
-                os.path.join(result_dir, 'Saved_sex', 'Best_model_save', f"SexNet.pth"))
+                result_dir + 'Best_model_of_leads_' + str(list_of_leads) +'_'+ f"SexNet.pth")
 
             # save each % epoch
-        if epoch > 0 and epoch % save_each == 0:
-            print('save epoch')
-            torch.save({
-                'sex_net': sex_net.state_dict(),
-                'optimizer_sex': optimizer_sex.state_dict(),
-                'epoch': epoch + 1},
-                os.path.join(result_dir, 'Saved_sex', 'Periodic_save', f"SexNet.pth"))
+        # if epoch > 0 and epoch % save_each == 0:
+        #     print('save epoch')
+        #     torch.save({
+        #         'sex_net': sex_net.state_dict(),
+        #         'optimizer_sex': optimizer_sex.state_dict(),
+        #         'epoch': epoch + 1},
+        #         os.path.join(result_dir, 'Saved_sex', 'Periodic_save', f"SexNet.pth"))
 
     print('Finished Training')
 
@@ -246,27 +244,41 @@ if __name__ == "__main__":
     parser.add_argument('--list_of_leads', default=None, type= int, nargs="*")
     parser.add_argument('--group', default=None, type=int)
     parser.add_argument('--title', default=None, type=str)
+    parser.add_argument('--alone', default=False, type=bool)
     args = parser.parse_args()
 
-    start_time = time.strftime("_%H_%M_%d_%m_%Y_")
-    if args.title == None:
-        result_dir = '/home/stu25/project/results_2' + '/' + start_time
+
+    result_dir = '/home/stu25/project/results_all/'
+
+    if args.alone:
+        list_of_leads = np.arange(1,13)
+        output = [list(map(list, combinations(list_of_leads, i))) for i in range(len(list_of_leads) + 1)]
+        print(output)
+        for i in range(1,len(output)):
+            for j in range(len(output[i])):
+                trian(result_dir, output[i][j])
+
+
     else:
-        result_dir = '/home/stu25/project/results_2' + '/' +args.title + start_time
-    os.makedirs(result_dir, exist_ok=True)
-    if args.list_of_leads is not None:
-        if args.group is None:
-            print('Recieved the following leads -  ', args.list_of_leads)
-            for i in range(len(args.list_of_leads)):
-                temp_dir = result_dir +'/Laed_'+str(args.list_of_leads[i])
-                trian(temp_dir,[args.list_of_leads[i]])
+        start_time = time.strftime("_%H_%M_%d_%m_%Y_")
+        if args.title == None:
+            result_dir =  result_dir +'/'+ start_time
         else:
-            list_of_list = [args.list_of_leads[n:n+args.group] for n in range(0, len(args.list_of_leads), args.group)]
-            print('Recieved the following leads -  ',list_of_list)
-            for i in range(len(list_of_list)):
-                temp_name = '_'.join(map(str, list_of_list[i]))
-                temp_dir = result_dir +'/Laeds_'+temp_name
-                trian(temp_dir,list_of_list[i])
-    else:
-        trian(result_dir)
+            result_dir = '/' +args.title
+        os.makedirs(result_dir, exist_ok=True)
+        if args.list_of_leads is not None:
+            if args.group is None:
+                print('Recieved the following leads -  ', args.list_of_leads)
+                for i in range(len(args.list_of_leads)):
+                    temp_dir = result_dir +'/Laed_'+str(args.list_of_leads[i])
+                    trian(temp_dir,[args.list_of_leads[i]])
+            else:
+                list_of_list = [args.list_of_leads[n:n+args.group] for n in range(0, len(args.list_of_leads), args.group)]
+                print('Recieved the following leads -  ',list_of_list)
+                for i in range(len(list_of_list)):
+                    temp_name = '_'.join(map(str, list_of_list[i]))
+                    temp_dir = result_dir +'/Laeds_'+temp_name
+                    trian(temp_dir,list_of_list[i])
+        else:
+            trian(result_dir)
 
