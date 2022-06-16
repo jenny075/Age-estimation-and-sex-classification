@@ -256,6 +256,7 @@ if __name__ == "__main__":
         print(output)
         for i in range(1,len(output)):
             for j in range(len(output[i])):
+                print('Starting Training Leads - ', str(output[i][j]))
                 trian(result_dir, output[i][j])
 
 
@@ -270,6 +271,7 @@ if __name__ == "__main__":
             if args.group is None:
                 print('Recieved the following leads -  ', args.list_of_leads)
                 for i in range(len(args.list_of_leads)):
+                    print('Starting Training Leads - ',(args.list_of_leads[i]))
                     temp_dir = result_dir +'/Laed_'+str(args.list_of_leads[i])
                     trian(temp_dir,[args.list_of_leads[i]])
             else:
