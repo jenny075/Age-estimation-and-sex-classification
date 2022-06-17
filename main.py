@@ -31,12 +31,13 @@ def trian(result_dir,list_of_leads=None):
     validaiting_log_age = {}
     training_log_sex = {}
     validaiting_log_sex = {}
+    result_dir_csv = result_dir + 'CSV_Files'
+    os.makedirs(result_dir_csv, exist_ok=True)
+    csvLoggerFile_path_train_age = result_dir_csv + "history_train_age_leads_" + str(list_of_leads) + ".csv"
 
-    csvLoggerFile_path_train_age = result_dir + "history_train_age_leads_" + str(list_of_leads) +  ".csv"
-
-    csvLoggerFile_path_val_age = result_dir + "history_val_age_leads_" + str(list_of_leads) + ".csv"
-    csvLoggerFile_path_train_sex = result_dir + "history_train_sex_leads_" + str(list_of_leads) + ".csv"
-    csvLoggerFile_path_val_sex = result_dir + "history_val_sex_leads_" + str(list_of_leads) + ".csv"
+    csvLoggerFile_path_val_age = result_dir_csv + "history_val_age_leads_" + str(list_of_leads) + ".csv"
+    csvLoggerFile_path_train_sex = result_dir_csv + "history_train_sex_leads_" + str(list_of_leads) + ".csv"
+    csvLoggerFile_path_val_sex = result_dir_csv + "history_val_sex_leads_" + str(list_of_leads) + ".csv"
 
     train_dataloader_sex, train_dataloader_age, val_dataloader_sex, val_dataloader_age, test_dataloader_sex, test_dataloader_age = load_dataset(list_of_leads)
 
@@ -248,16 +249,21 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 
-    result_dir = '/home/stu25/project/results_all/'
+    result_dir = '/home/stu25/project/results_new/'
 
     if args.alone:
         list_of_leads = np.arange(1,13)
         output = [list(map(list, combinations(list_of_leads, i))) for i in range(len(list_of_leads) + 1)]
         print(output)
-        for i in range(1,len(output)):
-            for j in range(len(output[i])):
-                print('Starting Training Leads - ', str(output[i][j]))
-                trian(result_dir, output[i][j])
+        if args.group is not None:
+            for j in range(len(output[args.group])):
+                print('Starting Training Leads - ', str(output[args.group][j]))
+                trian(result_dir, output[args.group][j])
+        else:
+            for i in range(1,len(output)):
+                for j in range(len(output[i])):
+                    print('Starting Training Leads - ', str(output[i][j]))
+                    trian(result_dir, output[i][j])
 
 
     else:
