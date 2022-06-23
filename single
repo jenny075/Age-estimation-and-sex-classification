@@ -1,0 +1,3 @@
+usage: main.py [-h] [--list_of_leads [LIST_OF_LEADS ...]] [--group GROUP]
+               [--title TITLE]
+main.py: error: unrecognized arguments: lead_14_06.out

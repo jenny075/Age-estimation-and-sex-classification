@@ -21,7 +21,7 @@ def writeCSVLoggerFile(csvLoggerFile_path,log):
         df.to_csv(f, mode='a', header=f.tell() == 0, index=False)
 
 
-def trian(result_dir,list_of_leads=None):
+def trian(result_dir,args,list_of_leads=None):
 
     writer = SummaryWriter(result_dir + '/' + 'tensor_logs')
     save_each = 5
@@ -39,7 +39,7 @@ def trian(result_dir,list_of_leads=None):
     csvLoggerFile_path_train_sex = result_dir_csv + "history_train_sex_leads_" + str(list_of_leads) + ".csv"
     csvLoggerFile_path_val_sex = result_dir_csv + "history_val_sex_leads_" + str(list_of_leads) + ".csv"
 
-    train_dataloader_sex, train_dataloader_age, val_dataloader_sex, val_dataloader_age, test_dataloader_sex, test_dataloader_age = load_dataset(list_of_leads)
+    train_dataloader_sex, train_dataloader_age, val_dataloader_sex, val_dataloader_age, test_dataloader_sex, test_dataloader_age = load_dataset(list_of_leads,args.CSV_file)
 
     if list_of_leads == None:
         age_net = models.AgeNet()
@@ -56,7 +56,7 @@ def trian(result_dir,list_of_leads=None):
     optimizer_sex = optim.Adam(sex_net.parameters(), lr=0.0003)
 
     # train age
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda:' + args.gpu if torch.cuda.is_available() else 'cpu')
     validation_losses = []
     age_net = age_net.to(device, non_blocking=True)
 
@@ -246,10 +246,15 @@ if __name__ == "__main__":
     parser.add_argument('--group', default=None, type=int)
     parser.add_argument('--title', default=None, type=str)
     parser.add_argument('--alone', default=False, type=bool)
+    parser.add_argument('--gpu', default=None, type=str)
+    parser.add_argument('--CSV_file', default=None, type=str, nargs="*")
+
     args = parser.parse_args()
 
+    folder_name = str(args.group)
 
-    result_dir = '/home/stu25/project/results_new/'
+    result_dir = '/home/stu25/project/results_new2/'+folder_name+'/'
+
 
     if args.alone:
         list_of_leads = np.arange(1,13)
@@ -258,12 +263,12 @@ if __name__ == "__main__":
         if args.group is not None:
             for j in range(len(output[args.group])):
                 print('Starting Training Leads - ', str(output[args.group][j]))
-                trian(result_dir, output[args.group][j])
+                trian(result_dir,args, output[args.group][j])
         else:
             for i in range(1,len(output)):
                 for j in range(len(output[i])):
                     print('Starting Training Leads - ', str(output[i][j]))
-                    trian(result_dir, output[i][j])
+                    trian(result_dir,args, output[i][j])
 
 
     else:
@@ -279,14 +284,14 @@ if __name__ == "__main__":
                 for i in range(len(args.list_of_leads)):
                     print('Starting Training Leads - ',(args.list_of_leads[i]))
                     temp_dir = result_dir +'/Laed_'+str(args.list_of_leads[i])
-                    trian(temp_dir,[args.list_of_leads[i]])
+                    trian(temp_dir,args,[args.list_of_leads[i]])
             else:
                 list_of_list = [args.list_of_leads[n:n+args.group] for n in range(0, len(args.list_of_leads), args.group)]
                 print('Recieved the following leads -  ',list_of_list)
                 for i in range(len(list_of_list)):
                     temp_name = '_'.join(map(str, list_of_list[i]))
                     temp_dir = result_dir +'/Laeds_'+temp_name
-                    trian(temp_dir,list_of_list[i])
+                    trian(temp_dir,args,list_of_list[i])
         else:
             trian(result_dir)
 
