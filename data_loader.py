@@ -33,9 +33,9 @@ class ECGDataset(torch.utils.data.Dataset):
         df = self.df.iloc[i]
 
         if self.sampling_rate == 100:
-            data = wfdb.rdsamp('/home/stu25/project/data/'+ df.filename_lr)
+            data = wfdb.rdsamp('/home/stu25/project/data/' + df.filename_lr)
         else:
-            data = wfdb.rdsamp('/home/stu25/project/data/'+ df.filename_hr)
+            data = wfdb.rdsamp('/home/stu25/project/data/' + df.filename_hr)
         signal, _ = data
         data = np.array(signal)
         if self.list_of_leads == None:

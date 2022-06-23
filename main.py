@@ -269,9 +269,9 @@ if __name__ == "__main__":
     else:
         start_time = time.strftime("_%H_%M_%d_%m_%Y_")
         if args.title == None:
-            result_dir =  result_dir +'/'+ start_time
+            result_dir = result_dir + start_time
         else:
-            result_dir = '/' +args.title
+            result_dir = result_dir + args.title
         os.makedirs(result_dir, exist_ok=True)
         if args.list_of_leads is not None:
             if args.group is None:
