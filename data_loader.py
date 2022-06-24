@@ -1,3 +1,6 @@
+import json
+import os.path
+
 import pandas as pd
 import numpy as np
 import wfdb
@@ -38,7 +41,7 @@ class ECGDataset(torch.utils.data.Dataset):
         #     data = wfdb.rdsamp('/home/stu25/project/data/' + df.filename_lr)
         data = wfdb.rdsamp(df.path_file)
         signal, _ = data
-        signal = (signal - np.min(signal, axis=0)) / (np.max(signal, axis=0) - np.min(signal, axis=0))
+        signal = (2(signal - np.min(signal, axis=0)) / (np.max(signal, axis=0) - np.min(signal, axis=0))-1)
         data = np.array(signal)
 
         if self.list_of_leads == None:
@@ -88,15 +91,33 @@ def load_dataset(list_of_leads,csv_file = None):
         extension = 'csv'
         all_filenames = [i for i in glob.glob('*.{}'.format(extension))]
         # combine all files in the list
-        Y = pd.concat([pd.read_csv(f) for f in csv_file])
+        Y = pd.concat([pd.read_csv(f) for f in csv_file], ignore_index=True)
         #Y.scp_codes = Y.scp_codes.apply(lambda x: ast.literal_eval(x))
         Y = Y.dropna(subset=['sex', 'age'])
-        Y.to_csv("combined_csv.csv", index=False, encoding='utf-8-sig')
+        Y = Y[Y['sex'] != 'Unknown']
+        Y = Y[Y['age'] != 'Unknown']
+        Y.to_csv("combined_csv.csv", index=False)
+        # dataset_All = ECGDataset(Y, 500, 'sex', list_of_leads)
+        # dataloader_All = DataLoader(dataset_All, batch_size=1, shuffle=False)
+        # list_to_drop = []
+        # print('start data filter')
+        # if os.path.isfile('drop_list.json'):
+        #     with open('drop_list.json','r') as f:
+        #         list_to_drop = json.load(f)['drop_list']
+        # else:
+        #     for i, data in enumerate(dataloader_All):
+        #         inputs, labels = data
+        #         if torch.isnan(inputs).any():
+        #             list_to_drop.append(i)
+        #     with open('drop_list.json', 'w') as f:
+        #         json.dump({'drop_list': list_to_drop}, f)
+        # print('finish data filter')
+        # print('found - {} bad data'.format(len(list_to_drop)))
         Y = Y.assign(fold='train')
         Y_f = Y[Y['sex']=='Female']
-        Y_f['sex'] == 1
+        Y_f = Y_f.assign(sex=1)
         Y_m = Y[Y['sex'] == 'Male']
-        Y_m['sex'] == 0
+        Y_m = Y_m.assign(sex=0)
         count = 0
         hist_count, bins, patch = plt.hist(Y_f['age'])
         new_df = pd.DataFrame(columns=Y_f.columns)

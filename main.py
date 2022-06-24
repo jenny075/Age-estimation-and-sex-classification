@@ -253,18 +253,20 @@ if __name__ == "__main__":
 
     folder_name = str(args.group)
 
-    result_dir = '/home/stu25/project/results_new2/'+folder_name+'/'
+    result_dir = '/home/stu25/project/'+folder_name+'/'
 
 
     if args.alone:
         list_of_leads = np.arange(1,13)
         output = [list(map(list, combinations(list_of_leads, i))) for i in range(len(list_of_leads) + 1)]
-        print(output)
+
         if args.group is not None:
+            print(output[args.group])
             for j in range(len(output[args.group])):
                 print('Starting Training Leads - ', str(output[args.group][j]))
                 trian(result_dir,args, output[args.group][j])
         else:
+            print(output)
             for i in range(1,len(output)):
                 for j in range(len(output[i])):
                     print('Starting Training Leads - ', str(output[i][j]))
@@ -272,6 +274,7 @@ if __name__ == "__main__":
 
 
     else:
+
         start_time = time.strftime("_%H_%M_%d_%m_%Y_")
         if args.title == None:
             result_dir = result_dir + start_time
