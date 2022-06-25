@@ -41,8 +41,13 @@ class ECGDataset(torch.utils.data.Dataset):
         #     data = wfdb.rdsamp('/home/stu25/project/data/' + df.filename_lr)
         data = wfdb.rdsamp(df.path_file)
         signal, _ = data
-        signal = (2(signal - np.min(signal, axis=0)) / (np.max(signal, axis=0) - np.min(signal, axis=0))-1)
-        data = np.array(signal)
+        if np.isnan(signal).any():
+            breakpoint()
+        signal_2 = 2*((signal - np.min(signal, axis=0)) / (np.max(signal, axis=0) - np.min(signal, axis=0) + np.finfo(float).eps))-1
+        if np.isnan(signal_2).any():
+            breakpoint()
+        data = np.array(signal_2)
+
 
         if self.list_of_leads == None:
             data_pad = np.zeros((data.shape[0] + 120, data.shape[1]))
@@ -56,6 +61,8 @@ class ECGDataset(torch.utils.data.Dataset):
             label = (df.sex)
         else:
             label = (df.age)
+        if np.isnan(label):
+            breakpoint()
         return signal, label
 
 def load_raw_data(df, sampling_rate):

@@ -81,6 +81,9 @@ def trian(result_dir,args,list_of_leads=None):
             # outputs[labels.isnan()]=0
             # labels[labels.isnan()]=0
             loss = criterion_age(outputs, labels)
+            if loss.item() is None:
+                breakpoint()
+
             print('batch - {},loss -{}'.format(i, loss.item()))
             loss.backward()
             optimizer_age.step()
@@ -253,7 +256,7 @@ if __name__ == "__main__":
 
     folder_name = str(args.group)
 
-    result_dir = '/home/stu25/project/'+folder_name+'/'
+    result_dir = '/home/stu25/project/new_normed_'+folder_name+'/'
 
 
     if args.alone:

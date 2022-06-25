@@ -59,16 +59,17 @@ def eval_models(args):
     # iterate over saved model
     for saved_model in args.models_path.iterdir():
 
-        if saved_model.name == 'tensor_logs' or saved_model.name == 'CSV_Files':
+        if saved_model.name == 'tensor_logs' or saved_model.name[-3:] == 'csv' or saved_model.name == 'CSV_Files':
             continue
 
         list_of_leads_str = saved_model.name.split('_')[4]
+        print(list_of_leads_str)
         list_of_leads = list(map(int, list_of_leads_str[1:-1].split(',')))
         print(list_of_leads)
 
 
         _, _, val_dataloader_sex, val_dataloader_age, test_dataloader_sex, test_dataloader_age = load_dataset(
-            list_of_leads)
+            list_of_leads, args.CSV_file)
         print(saved_model.name[-10:-4])
 
         if saved_model.name[-10:-4] == 'SexNet':
@@ -284,17 +285,17 @@ def eval_models(args):
         #     break
 
 
-    df_sex = pd.DataFrame.from_dict(auc_sex_val, 'index', columns=['val'])
-    df_sex['test'] = auc_sex_test.values()
-    df_sex.to_csv('Sex_auc_results' + str(args.group) +'.csv')
+        df_sex = pd.DataFrame.from_dict(auc_sex_val, 'index', columns=['val'])
+        df_sex['test'] = auc_sex_test.values()
+        df_sex.to_csv('Sex_auc_results' + str(args.group) +'.csv')
 
-    df_age = pd.DataFrame.from_dict(r2_age_val, 'index', columns=['val'])
-    df_age['test'] = r2_age_test.values()
-    df_age.to_csv('R2_age_results' + str(args.group) +'.csv')
+        df_age = pd.DataFrame.from_dict(r2_age_val, 'index', columns=['val'])
+        df_age['test'] = r2_age_test.values()
+        df_age.to_csv('R2_age_results' + str(args.group) +'.csv')
 
-    df_age_range = pd.DataFrame.from_dict(r2_age_val_range, 'index', columns=['val'])
-    df_age_range['test'] = r2_age_test_range.values()
-    df_age_range.to_csv('R2_age_range_results' + str(args.group) + '.csv')
+        df_age_range = pd.DataFrame.from_dict(r2_age_val_range, 'index', columns=['val'])
+        df_age_range['test'] = r2_age_test_range.values()
+        df_age_range.to_csv('R2_age_range_results' + str(args.group) + '.csv')
 
 
 if __name__ == "__main__":
@@ -302,6 +303,7 @@ if __name__ == "__main__":
     parser.add_argument('--group', default=None, type=int, nargs="*")
     parser.add_argument('--plot', default=None, type=bool)
     parser.add_argument('--models_path', default=None, type=pathlib.Path)
+    parser.add_argument('--CSV_file', default=None, type=str, nargs="*")
     args = parser.parse_args()
 
     eval_models(args)
