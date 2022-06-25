@@ -90,6 +90,8 @@ def trian(result_dir,args,list_of_leads=None):
 
             # print statistics
             running_loss += loss.item()
+        # if epoch>12:
+        #     optimizer_age.param_groups[0]['lr'] = 0.00015
 
         print(running_loss, i)
         print(f'epoch [{epoch}] - train_avg_loss: {running_loss / (i + 1)}')
@@ -162,7 +164,7 @@ def trian(result_dir,args,list_of_leads=None):
     # if not os.path.isdir(result_dir + '/Saved_sex' + '/Best_model_save'):
     #     os.makedirs(result_dir + '/Saved_sex' + '/Best_model_save', exist_ok=True)
 
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    #device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     validation_losses = []
     sex_net = sex_net.to(device, non_blocking=True)
 
@@ -188,6 +190,10 @@ def trian(result_dir,args,list_of_leads=None):
 
             # print statistics
             running_loss += loss.item()
+
+        # if epoch>6:
+        #     optimizer_sex.param_groups[0]['lr'] = 0.00015
+
         print(running_loss, i)
         print(f'epoch [{epoch + 1}] - train_avg_loss: {running_loss / (i + 1)}')
         writer.add_scalar("Train/sex_Loss", running_loss / (i + 1), epoch)
@@ -256,7 +262,7 @@ if __name__ == "__main__":
 
     folder_name = str(args.group)
 
-    result_dir = '/home/stu25/project/new_normed_'+folder_name+'/'
+    result_dir = '/home/stu25/project/new_normed_PYCHARM_'+folder_name+'/'
 
 
     if args.alone:

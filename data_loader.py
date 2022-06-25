@@ -30,6 +30,8 @@ class ECGDataset(torch.utils.data.Dataset):
         self.test_fold = 10
         self.val_fol = 9
         self.list_of_leads = list_of_leads
+        self.start = 0
+        self.end = len(self.df)
 
     def __len__(self):
         return self.df.shape[0]
@@ -64,6 +66,21 @@ class ECGDataset(torch.utils.data.Dataset):
         if np.isnan(label):
             breakpoint()
         return signal, label
+
+
+def worker_init_fn(worker_id):
+    worker_info = torch.utils.data.get_worker_info()
+    dataset = worker_info.dataset  # the dataset copy in this worker process
+    overall_start = dataset.start
+    overall_end = dataset.end
+    # configure the dataset to only process the split workload
+    per_worker = int(np.floor((overall_end - overall_start) / float(worker_info.num_workers)))
+    worker_id = worker_info.id
+    dataset.start = overall_start + worker_id * per_worker
+    dataset.end = min(dataset.start + per_worker, overall_end)
+    print("worker ID-{},Dataset_start-{},Dataset_end-{},per_worker-{}".format(worker_id,dataset.start,dataset.end,per_worker))
+
+
 
 def load_raw_data(df, sampling_rate):
     if sampling_rate == 100:
@@ -181,19 +198,25 @@ def load_dataset(list_of_leads,csv_file = None):
     # plt.show()
 
     dataset_train_sex = ECGDataset(Y_train, 500, 'sex',list_of_leads)
-    train_dataloader_sex = DataLoader(dataset_train_sex , batch_size=16, shuffle=True,drop_last=True)
+    train_dataloader_sex = DataLoader(dataset_train_sex , batch_size=16, num_workers=10,
+                                           worker_init_fn=worker_init_fn,shuffle=True,drop_last=True)
     dataset_train_age = ECGDataset(Y_train, 500, 'age',list_of_leads)
-    train_dataloader_age = DataLoader(dataset_train_age , batch_size=64, shuffle=True,drop_last=True)
+    train_dataloader_age = DataLoader(dataset_train_age , batch_size=64,num_workers=10,
+                                           worker_init_fn=worker_init_fn,shuffle=True,drop_last=True)
 
     dataset_val_sex = ECGDataset(Y_val, 500, 'sex',list_of_leads)
-    val_dataloader_sex = DataLoader(dataset_val_sex , batch_size=16, shuffle=False,drop_last=True)
+    val_dataloader_sex = DataLoader(dataset_val_sex , batch_size=16,num_workers=10,
+                                           worker_init_fn=worker_init_fn, shuffle=False,drop_last=True)
     dataset_val_age = ECGDataset(Y_val, 500, 'age',list_of_leads)
-    val_dataloader_age = DataLoader(dataset_val_age , batch_size=64, shuffle=False,drop_last=True)
+    val_dataloader_age = DataLoader(dataset_val_age , batch_size=64,num_workers=10,
+                                           worker_init_fn=worker_init_fn, shuffle=False,drop_last=True)
 
     dataset_test_sex = ECGDataset(Y_test, 500, 'sex',list_of_leads)
-    test_dataloader_sex = DataLoader(dataset_test_sex , batch_size=16, shuffle=False,drop_last=True)
+    test_dataloader_sex = DataLoader(dataset_test_sex , batch_size=16,num_workers=10,
+                                           worker_init_fn=worker_init_fn, shuffle=False,drop_last=True)
     dataset_test_age = ECGDataset(Y_test, 500, 'age',list_of_leads)
-    test_dataloader_age = DataLoader(dataset_test_age , batch_size=64, shuffle=False,drop_last=True)
+    test_dataloader_age = DataLoader(dataset_test_age , batch_size=64,num_workers=10,
+                                           worker_init_fn=worker_init_fn, shuffle=False,drop_last=True)
 
 
     return train_dataloader_sex, train_dataloader_age, val_dataloader_sex, val_dataloader_age, test_dataloader_sex, test_dataloader_age
