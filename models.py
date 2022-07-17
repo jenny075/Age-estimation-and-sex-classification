@@ -1,3 +1,4 @@
+import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
@@ -59,8 +60,8 @@ class SexNet(nn.Module):
         self.Temp6 = TemporalBlock(64, 64, 3, 2)
         self.Temp7 = TemporalBlock(64, 64, 3, 2)
         self.Temp8 = TemporalBlock(64, 64, 3, 1)
-        self.Spat = SpatialBlock(5, 128, 12, 2)
-        self.FC1 = FCBlock(128 * 26, 128)
+        self.Spat = SpatialBlock(5, 128, input_size, 2)
+        self.FC1 = FCBlock(128 * np.floor((64-input_size)/2).astype('int'), 128)
         self.FC2 = FCBlock(128, 64)
         self.out = nn.Linear(64, 2)
 
@@ -94,9 +95,9 @@ class AgeNet(nn.Module):
         self.Temp6 = TemporalBlock(64,64,3,2)
         self.Temp7 = TemporalBlock(64,64,3,2)
         self.Temp8 = TemporalBlock(64,64,3,1)
-        self.Spat = SpatialBlock(5,128,12,2)
+        self.Spat = SpatialBlock(5,128,input_size,2)
 
-        self.FC1 =  FCBlock(128*26,128)
+        self.FC1 =  FCBlock(128* np.floor((64-input_size)/2).astype('int'),128)
         self.FC2 =  FCBlock(128,64)
         self.out = nn.Linear(64,1)
 

@@ -262,7 +262,7 @@ if __name__ == "__main__":
 
     folder_name = str(args.group)
 
-    result_dir = '/home/stu25/project/new_normed_PYCHARM_'+folder_name+'/'
+    result_dir = '/home/stu25/project/new_normed_PYCHARM_spacial_block_'+folder_name+'/'
 
 
     if args.alone:

@@ -29,8 +29,8 @@ def load_json_sex(path):
         data = json.load(f)
     tg = data[0]
     pred = data[1]
-    auc = data[2]
-    return tg, pred, auc
+
+    return tg, pred
 
 def load_json_age(path):
     with open(path, 'r') as f:
@@ -111,9 +111,7 @@ def eval_models(args):
     # iterate over saved model
     for saved_model in args.models_path.iterdir():
         if args.load:
-            print(args.saved_path[0][-7:-4])
-            if args.saved_path[0][-7:-4]=='sex':
-                print('plot')
+            if args.saved_path[0][-7:-3]=='sex':
                 plt.figure()
                 plt.title('ROC Curve')
                 plt.plot([0, 1], [0, 1], 'r--')
@@ -121,17 +119,16 @@ def eval_models(args):
                 plt.ylim([-0.1, 1.1])
                 for i in range(len(args.saved_path)):
                     leads_str = args.saved_path[i].split('__')[0]
-                    fpr, tpr, auc= load_pickle_sex(args.saved_path[i])
-                    #auc_score = metrics.auc(fpr, tpr)
-                    plt.plot(fpr, tpr, label='AUC_{} = {:.2f}'.format(leads_str, auc))
-                # plt.legend()
+                    fpr, tpr = load_pickle_sex(args.saved_path[i])
+                    auc_score = metrics.auc(fpr, tpr)
+                    plt.plot(fpr, tpr, label='AUC_{} = {:.2f}'.format(leads_str, auc_score))
+                plt.legend()
                 plt.ylabel('True Positive Rate')
                 plt.xlabel('False Positive Rate')
                 plt.show()
-            print(args.saved_path[-1][-7:-4] )
-            if args.saved_path[-1][-7:-4] == 'reg':
-                print('plot')
+            if args.saved_path[0][-7:-3] == 'age':
                 plt.figure()
+                plt.plot(tg_val, tg_val, color='blue', linewidth=1)
                 for i in range(len(args.saved_path)):
                     leads_str = args.saved_path[i].split('__')[0]
                     x, y, r2 = load_pickle_age(args.saved_path[i])
@@ -227,14 +224,14 @@ def eval_models(args):
                 fpr_test, tpr_test, _ = metrics.roc_curve(label_test_all.detach().numpy(), outputs_test_all[:, 1].detach().cpu().numpy())
                 fpr_val, tpr_val, _ = metrics.roc_curve(label_val_all.detach().numpy(), outputs_val_all[:, 1].detach().cpu().numpy())
 
-
+                if args.save:
+                    print('save sex')
+                    save_pickle([fpr_test, tpr_test], list_of_leads_str, args.group, "test_sex")
+                    save_pickle([fpr_val, tpr_val], list_of_leads_str, args.group, "val_sex")
 
                 auc_score_val = metrics.auc(fpr_val, tpr_val)
                 auc_score_test = metrics.auc(fpr_test, tpr_test)
-                if args.save:
-                    print('save sex')
-                    save_pickle([fpr_test, tpr_test, auc_score_test], list_of_leads_str, args.group, "test_sex")
-                    save_pickle([fpr_val, tpr_val, auc_score_val], list_of_leads_str, args.group, "val_sex")
+
                 if args.plot:
                     plt.figure()
                     plt.title('ROC Curve')
@@ -294,6 +291,8 @@ def eval_models(args):
 
                 r2_score_val = r2_score(tg_val, pred_val)
                 r2_score_test = r2_score(tg_test, pred_test)
+                print("r2_score_val - " , r2_score_val )
+                print("r2_score_test - ", r2_score_test)
                 r2_score_val_range = r2_score(tg_val_range, pred_val_range)
                 r2_score_test_range = r2_score(tg_test_range, pred_test_range)
 

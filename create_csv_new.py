@@ -3,7 +3,7 @@ import wfdb
 import pandas as pd
 
 print("Starting")
-data_path = pathlib.Path('/home/stu25/project_2/new_data/WFDB_Ningbo')
+data_path = pathlib.Path("/home/stu25/project_2/new_data/Germany/")
 df = pd.DataFrame(columns=['patient_id','path_file' ,'age', 'sex'])
 i=1
 for data in data_path.iterdir():
@@ -19,5 +19,5 @@ for data in data_path.iterdir():
     sex = sex.split(' ')[1]
     df = pd.concat([df,pd.Series([data_name,path, age, sex],index=['patient_id','path_file' ,'age', 'sex']).to_frame().T],
                    ignore_index=True)
-df.to_csv('data_labels_WFDB_Ningbo.csv')
+df.to_csv('data_labels_Germany.csv')
 print("Finished")

@@ -43,11 +43,15 @@ class ECGDataset(torch.utils.data.Dataset):
         #     data = wfdb.rdsamp('/home/stu25/project/data/' + df.filename_lr)
         data = wfdb.rdsamp(df.path_file)
         signal, _ = data
-        if np.isnan(signal).any():
-            breakpoint()
+        # if np.isnan(signal).any():
+        #     breakpoint()
+        if signal.shape[0]>5000:
+            signal = signal[1000:11000]
+            signal = signal[0:11000:2]
+
         signal_2 = 2*((signal - np.min(signal, axis=0)) / (np.max(signal, axis=0) - np.min(signal, axis=0) + np.finfo(float).eps))-1
-        if np.isnan(signal_2).any():
-            breakpoint()
+        # if np.isnan(signal_2).any():
+        #     breakpoint()
         data = np.array(signal_2)
 
 
@@ -63,8 +67,8 @@ class ECGDataset(torch.utils.data.Dataset):
             label = (df.sex)
         else:
             label = (df.age)
-        if np.isnan(label):
-            breakpoint()
+        # if np.isnan(label):
+        #     breakpoint()
         return signal, label
 
 
@@ -120,6 +124,33 @@ def load_dataset(list_of_leads,csv_file = None):
         Y = Y.dropna(subset=['sex', 'age'])
         Y = Y[Y['sex'] != 'Unknown']
         Y = Y[Y['age'] != 'Unknown']
+
+        if len(Y)<2000:
+            Y = Y.assign(fold='val')
+            Y_f = Y[(Y['sex'] == 'Female') | (Y['sex'] == 'female')]
+            Y_f = Y_f.assign(sex=1)
+            Y_m = Y[(Y['sex'] == 'Male') | (Y['sex'] == 'male')]
+            Y_m = Y_m.assign(sex=0)
+            Y_new = Y_f.append(Y_m, ignore_index=True)
+            Y_new = shuffle(Y_new)
+            Y_new.iloc[0:np.round(0.5 * len(Y_new)).astype('int'), -1] = 'test'
+            Y_val = Y_new[(Y_new.fold == 'val')]
+            Y_test = Y_new[Y_new.fold == 'test']
+            dataset_val_sex = ECGDataset(Y_val, 500, 'sex', list_of_leads)
+            val_dataloader_sex = DataLoader(dataset_val_sex, batch_size=16, num_workers=0,
+                                            worker_init_fn=worker_init_fn, shuffle=False, drop_last=True)
+            dataset_val_age = ECGDataset(Y_val, 500, 'age', list_of_leads)
+            val_dataloader_age = DataLoader(dataset_val_age, batch_size=64, num_workers=0,
+                                            worker_init_fn=worker_init_fn, shuffle=False, drop_last=True)
+
+            dataset_test_sex = ECGDataset(Y_test, 500, 'sex', list_of_leads)
+            test_dataloader_sex = DataLoader(dataset_test_sex, batch_size=16, num_workers=0,
+                                             worker_init_fn=worker_init_fn, shuffle=False, drop_last=True)
+            dataset_test_age = ECGDataset(Y_test, 500, 'age', list_of_leads)
+            test_dataloader_age = DataLoader(dataset_test_age, batch_size=64, num_workers=0,
+                                             worker_init_fn=worker_init_fn, shuffle=False, drop_last=True)
+
+            return [], [], val_dataloader_sex, val_dataloader_age, test_dataloader_sex, test_dataloader_age
         Y.to_csv("combined_csv.csv", index=False)
         # dataset_All = ECGDataset(Y, 500, 'sex', list_of_leads)
         # dataloader_All = DataLoader(dataset_All, batch_size=1, shuffle=False)
@@ -138,9 +169,9 @@ def load_dataset(list_of_leads,csv_file = None):
         # print('finish data filter')
         # print('found - {} bad data'.format(len(list_to_drop)))
         Y = Y.assign(fold='train')
-        Y_f = Y[Y['sex']=='Female']
+        Y_f = Y[(Y['sex']=='Female') | (Y['sex']=='female')]
         Y_f = Y_f.assign(sex=1)
-        Y_m = Y[Y['sex'] == 'Male']
+        Y_m = Y[(Y['sex'] == 'Male') | (Y['sex']=='male')]
         Y_m = Y_m.assign(sex=0)
         count = 0
         hist_count, bins, patch = plt.hist(Y_f['age'])
@@ -198,24 +229,24 @@ def load_dataset(list_of_leads,csv_file = None):
     # plt.show()
 
     dataset_train_sex = ECGDataset(Y_train, 500, 'sex',list_of_leads)
-    train_dataloader_sex = DataLoader(dataset_train_sex , batch_size=16, num_workers=10,
+    train_dataloader_sex = DataLoader(dataset_train_sex , batch_size=16, num_workers=0,
                                            worker_init_fn=worker_init_fn,shuffle=True,drop_last=True)
     dataset_train_age = ECGDataset(Y_train, 500, 'age',list_of_leads)
-    train_dataloader_age = DataLoader(dataset_train_age , batch_size=64,num_workers=10,
+    train_dataloader_age = DataLoader(dataset_train_age , batch_size=64,num_workers=0,
                                            worker_init_fn=worker_init_fn,shuffle=True,drop_last=True)
 
     dataset_val_sex = ECGDataset(Y_val, 500, 'sex',list_of_leads)
-    val_dataloader_sex = DataLoader(dataset_val_sex , batch_size=16,num_workers=10,
+    val_dataloader_sex = DataLoader(dataset_val_sex , batch_size=16,num_workers=0,
                                            worker_init_fn=worker_init_fn, shuffle=False,drop_last=True)
     dataset_val_age = ECGDataset(Y_val, 500, 'age',list_of_leads)
-    val_dataloader_age = DataLoader(dataset_val_age , batch_size=64,num_workers=10,
+    val_dataloader_age = DataLoader(dataset_val_age , batch_size=64,num_workers=0,
                                            worker_init_fn=worker_init_fn, shuffle=False,drop_last=True)
 
     dataset_test_sex = ECGDataset(Y_test, 500, 'sex',list_of_leads)
-    test_dataloader_sex = DataLoader(dataset_test_sex , batch_size=16,num_workers=10,
+    test_dataloader_sex = DataLoader(dataset_test_sex , batch_size=16,num_workers=0,
                                            worker_init_fn=worker_init_fn, shuffle=False,drop_last=True)
     dataset_test_age = ECGDataset(Y_test, 500, 'age',list_of_leads)
-    test_dataloader_age = DataLoader(dataset_test_age , batch_size=64,num_workers=10,
+    test_dataloader_age = DataLoader(dataset_test_age , batch_size=64,num_workers=0,
                                            worker_init_fn=worker_init_fn, shuffle=False,drop_last=True)
 
 

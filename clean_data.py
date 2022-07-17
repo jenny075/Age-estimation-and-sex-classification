@@ -9,16 +9,24 @@ import data_loader
 
 
 print("Starting")
-name = "/home/stu25/project_2/new_data/data_labels_WFDB_Ningbo"
+name = "/home/stu25/project_2/new_data/data_labels_Germany"
 Y = pd.read_csv(name + ".csv")
 dataset_All = data_loader.ECGDataset(Y, 500, 'sex', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 dataloader_All = DataLoader(dataset_All, batch_size=1, shuffle=False)
 list_to_drop = []
+list_to_save = []
+count = []
 print('start data filter')
 for i, data in enumerate(dataloader_All):
     inputs, labels = data
+
     if torch.isnan(inputs).any():
         list_to_drop.append(i)
+        continue
+    if inputs.size()[1] == 5000:
+        count +=1
+        list_to_save.append(i)
+
 print('finish data filter')
 print('found - {} bad data'.format(len(list_to_drop)))
 new_name = name + "_clean.csv"
