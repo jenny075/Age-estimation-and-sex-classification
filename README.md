@@ -17,7 +17,7 @@ with similar distribution of age and sex in each set.
 we trained the AgeNet and SexNet on the 12-leads ECG inputs to create baseline models and reproduce the paper results.
 Next, we trained the networks on different combinations of a reduced set of leads
 to examine our hypothesis. The models were trained on 4-
-leads, 6-leads, and 8-leads inpu
+leads, 6-leads, and 8-leads inputs.
 
 
 | Model      | AgeNet (R^2) |  SexNet (AUC)   | 
