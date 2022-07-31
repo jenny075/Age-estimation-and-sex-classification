@@ -78,8 +78,7 @@ def trian(result_dir,args,list_of_leads=None):
 
             # forward + backward + optimize
             outputs = age_net(inputs)
-            # outputs[labels.isnan()]=0
-            # labels[labels.isnan()]=0
+
             loss = criterion_age(outputs, labels)
             if loss.item() is None:
                 breakpoint()
@@ -137,34 +136,11 @@ def trian(result_dir,args,list_of_leads=None):
                 'epoch': epoch + 1},
                 result_dir+'Best_model_of_leads_'+str(list_of_leads) +'_' +f"AgeNet.pth")
 
-            # save each % epoch
-        # if epoch > 0 and epoch % save_each == 0:
-        #     print('save epoch')
-        #     print(os.path.join(result_dir, 'Saved', 'Periodic_save', f"AgeNet.pth"))
-        #     torch.save({
-        #         'age_net': age_net.state_dict(),
-        #         'optimizer_age': optimizer_age.state_dict(),
-        #         'epoch': epoch + 1},
-        #         os.path.join(result_dir, 'Saved', 'Periodic_save', f"AgeNet.pth"))
 
     torch.cuda.empty_cache()
     print('Finished Training')
 
-    # train sex
 
-    # start_time = time.strftime("_%d_%m_%Y_%H_%M")
-    # result_dir = '/content/drive/MyDrive/results_2' +'/' + start_time
-    # os.makedirs(result_dir, exist_ok=True)
-    # writer = SummaryWriter(result_dir + '/' + 'tensor_logs')
-    # save_each = 5
-
-    # if not os.path.isdir(result_dir + '/Saved_sex' + '/Periodic_save'):
-    #     os.makedirs(result_dir + '/Saved_sex' + '/Periodic_save', exist_ok=True)
-    #
-    # if not os.path.isdir(result_dir + '/Saved_sex' + '/Best_model_save'):
-    #     os.makedirs(result_dir + '/Saved_sex' + '/Best_model_save', exist_ok=True)
-
-    #device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     validation_losses = []
     sex_net = sex_net.to(device, non_blocking=True)
 

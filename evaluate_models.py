@@ -53,9 +53,10 @@ def load_pickle_sex(path):
     new_dict = pickle.load(infile)
     tg = new_dict[0]
     pred = new_dict[1]
+    auc = new_dict[2]
     infile.close()
 
-    return tg, pred
+    return tg, pred, auc
 
 def load_pickle_age(path):
     infile = open(path, 'rb')
@@ -123,8 +124,8 @@ def eval_models(args):
                     leads_str = args.saved_path[i].split('__')[0]
                     fpr, tpr, auc= load_pickle_sex(args.saved_path[i])
                     #auc_score = metrics.auc(fpr, tpr)
-                    plt.plot(fpr, tpr, label='AUC_{} = {:.2f}'.format(leads_str, auc))
-                # plt.legend()
+                    plt.plot(fpr, tpr, label='AUC_{} = {:.4f}'.format(leads_str, auc))
+                plt.legend()
                 plt.ylabel('True Positive Rate')
                 plt.xlabel('False Positive Rate')
                 plt.show()
@@ -133,13 +134,36 @@ def eval_models(args):
                 print('plot')
                 plt.figure()
                 for i in range(len(args.saved_path)):
-                    leads_str = args.saved_path[i].split('__')[0]
+
                     x, y, r2 = load_pickle_age(args.saved_path[i])
-                    plt.plot(x, y, label='{} R^2= {:.2f}'.format(leads_str, r2))
                     if i == 0:
                         plt.plot(x, x, color='blue', linewidth=1, label='Real Age = Estimated Age')
+                    leads_str = args.saved_path[i].split('__')[0]
+                    plt.plot(x, y, label='{} R^2= {:.4f}'.format(leads_str, r2))
                 plt.legend()
+                plt.title('Age Regression')
                 plt.show()
+
+                ages = np.unique(x)
+                ages = ages[ages >= 18]
+                print(ages)
+                len_age = len(ages)
+                dict_ages = {}
+                plt.figure()
+                for i in range(len(ages) // 2):
+                    idx = np.where(x == ages[i])
+                    pred_temp = y[idx]
+                    dict_ages[(ages[i])] = pred_temp
+                fig, ax = plt.subplots()
+                # ax.plot(np.arange(len_age // 2)+1, np.arange(len_age // 2)+1)
+                ax.set_xticklabels(dict_ages.keys())
+                ind = np.arange(1, len(ages) // 2 + 2)
+                ax.plot(ages[ind])
+                ax.boxplot(dict_ages.values())
+                plt.show()
+
+
+
 
         else:
             if saved_model.name == 'tensor_logs' or saved_model.name[-3:] == 'csv' or saved_model.name == 'CSV_Files':
@@ -238,14 +262,14 @@ def eval_models(args):
                 if args.plot:
                     plt.figure()
                     plt.title('ROC Curve')
-                    plt.plot(fpr_val, tpr_val, label='AUC = {:.2f}'.format(auc_score_val))
-                    plt.plot(fpr_test, tpr_test, label='AUC = {:.2f}'.format(auc_score_test))
+                    plt.plot(fpr_val, tpr_val)
+                    plt.plot(fpr_test, tpr_test)
                     plt.plot([0, 1], [0, 1], 'r--')
                     plt.xlim([-0.1, 1.1])
                     plt.ylim([-0.1, 1.1])
                     plt.ylabel('True Positive Rate')
                     plt.xlabel('False Positive Rate')
-                    plt.legend(['val= {:.2f}'.format(auc_score_val), 'test={:.2f}'.format(auc_score_test)],
+                    plt.legend(['val= {:.4f}'.format(auc_score_val), 'test={:.4f}'.format(auc_score_test)],
                                loc='lower right')
                     plt.show()
 
@@ -328,14 +352,14 @@ def eval_models(args):
                     print(ages)
                     len_age = len(ages)
                     dict_ages = {}
-                    plt.figure()
+                    plt.figure(figsize=(20,15))
                     for i in range(len(ages)//2):
                         idx = np.where(tg_test == ages[i])
                         pred_temp = pred_test[idx]
-                        dict_ages[(ages[i])] = pred_temp
+                        dict_ages[str(ages[i].astype(int))] = pred_temp
                     fig, ax = plt.subplots()
                     # ax.plot(np.arange(len_age // 2)+1, np.arange(len_age // 2)+1)
-                    ax.set_xticklabels(dict_ages.keys())
+                    ax.set_xticklabels(dict_ages.keys(),rotation=90, ha='right')
                     ind = np.arange(1, len(ages) // 2+2)
                     ax.plot(ages[ind])
                     ax.boxplot(dict_ages.values())
@@ -346,10 +370,11 @@ def eval_models(args):
                     for i in range(len(ages)//2,len(ages)):
                         idx = np.where(tg_test == ages[i])
                         pred_temp = pred_test[idx]
-                        dict_ages[str(ages[i])] = pred_temp
+                        dict_ages[str(ages[i].astype(int))] = pred_temp
                     fig, ax = plt.subplots()
                     ax.boxplot(dict_ages.values())
-                    ax.set_xticklabels(dict_ages.keys())
+                    ax.set_xticklabels(dict_ages.keys(),rotation=90, ha='right')
+
                     ind = np.arange(len(ages) // 2, len(ages))
                     ax.plot(ages[ind])
                     plt.show()
@@ -366,11 +391,12 @@ def eval_models(args):
 
                 if args.plot:
                     plt.figure()
-                    plt.plot(tg_val, tg_val, color='blue',linewidth=1)
-                    plt.plot(tg_val, m_val * tg_val + b_val, color='green', linewidth=1)
-                    plt.plot(tg_test, m_test * tg_test + b_test, color='red', linewidth=1)
-                    plt.legend(['Real Age = Estimated Age', 'Linear Regression of Estimated Age - Validation', 'Linear Regression of Estimated Age - Test' ])
-                    plt.title('Validation')
+                    plt.plot(tg_val, tg_val, color='blue',linewidth=1, label='Real Age = Estimated Age')
+                    plt.plot(tg_val, m_val * tg_val + b_val, color='green', linewidth=1, label='val R^2= {:.2f}'.format(r2_score_val))
+                    plt.plot(tg_test, m_test * tg_test + b_test, color='red', linewidth=1, label='test R^2= {:.2f}'.format(r2_score_test))
+                    # plt.legend(['Real Age = Estimated Age', 'Linear Regression of Estimated Age - Validation', 'Linear Regression of Estimated Age - Test' ])
+                    plt.legend()
+                    plt.title('Regression')
                     plt.show()
 
                     # plt.figure()
